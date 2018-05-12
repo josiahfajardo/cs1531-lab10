@@ -1,5 +1,8 @@
 from flask import Flask
-from flask_login import LoginManager
+try:
+    from flask_login import LoginManager
+except ImportError:
+    from extra_for_windows.flask_login import LoginManager
 from src.client import bootstrap_system
 
 

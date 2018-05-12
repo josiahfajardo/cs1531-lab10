@@ -1,6 +1,5 @@
 from src.Booking import Booking
 
-
 class CarRentalSystem:
     def __init__(self):
         self._cars = []
@@ -62,3 +61,10 @@ class CarRentalSystem:
             if c.get_rego() == rego:
                 return c
         return None
+
+class BookingException(Exception):
+    
+    def __init__(self, msg=None):
+        if msg is None:
+            msg = "An error occured with your booking."
+        super().__init__()

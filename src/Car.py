@@ -1,7 +1,9 @@
-from abc import ABC
+from abc import ABCMeta
 
 
-class Car(ABC):
+class Car(object):
+    
+    __metaclass__ = ABCMeta
 
     def __init__(self, name, model, rate, rego):
         self._name = name
@@ -35,24 +37,24 @@ class Car(ABC):
 class SmallCar(Car):
 
     def __init__(self, name, model, rego):
-        super().__init__(name, model, 50, rego)
+        super(SmallCar, self).__init__(name, model, 50, rego)
 
     def __str__(self):
         return "Small Car details: {0},{1}".format(self._name, self._model)
 
 class MediumCar(Car):
     def __init__(self, name, model, rego):
-        super().__init__(name, model, 75, rego)
+        super(MediumCar, self).__init__(name, model, 75, rego)
 
     def __str__(self):
         return "Medium car details: {0},{1}".format(self._name, self._model)
 
 class LargeCar(Car):
     def __init__(self, name, model, rego):
-        super().__init__(name, model, 100, rego)
+        super(LargeCar, self).__init__(name, model, 100, rego)
 
     def get_fee(self, period):
-        fee = super().get_fee(period)
+        fee = super(LargeCar, self).get_fee(period)
         if period >= 7:
             fee = fee * 0.95
         return fee
@@ -63,11 +65,11 @@ class LargeCar(Car):
 class PremiumCar(Car):
 
     def __init__(self, name, model, rego):
-        super().__init__(name, model, 150, rego)
+        super(PremiumCar, self).__init__(name, model, 150, rego)
         self._premium_tariff = 0.15
 
     def get_fee(self, period):
-        return super().get_fee(period) * 1.15
+        return super(PremiumCar, self).get_fee(period) * 1.15
 
     def __str__(self):
         return "Premium car details: {0},{1}".format(self._name, self._model)

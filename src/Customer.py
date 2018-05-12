@@ -1,9 +1,14 @@
-from flask_login import UserMixin
-from abc import ABC, abstractmethod
+try:
+    from flask_login import UserMixin
+except ImportError:
+    from extra_for_windows.flask_login import UserMixin
+
+from abc import ABCMeta, abstractmethod
 
 
-class User(UserMixin, ABC):
+class User(UserMixin):
     __id = -1
+    __metaclass__ = ABCMeta
 
     def __init__(self, username, password):
         self._id = self._generate_id()
@@ -45,7 +50,7 @@ class User(UserMixin, ABC):
 class Customer(User):
 
     def __init__(self, username, password, license):
-        super().__init__(username, password)
+        super(Customer, self).__init__(username, password)
         self._licence = license
 
     def __str__(self):
