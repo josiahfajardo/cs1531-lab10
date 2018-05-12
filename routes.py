@@ -74,27 +74,52 @@ def car(rego):
 @login_required
 def book(rego):
     car = system.get_car(rego)
+    
     if car is None:
         abort(404)
     if request.method == 'POST':
-        date_format = "%Y-%m-%d"
-        start_date = datetime.strptime(request.form['start_date'], date_format)
-        end_date = datetime.strptime(request.form['end_date'], date_format)
-        diff = end_date - start_date
-        if 'check' in request.form:
-            fee = car.get_fee(diff.days)
+
+        try:
+            debug = open("debug.txt", 'a+')
+            debug.write(str(request.form))
+            debug.close()
+            errors = check_input_fields_booking(request.form['start_location'], 
+                                                request.form['end_location'],
+                                                request.form['start_date'],
+                                                request.form['end_date'])
+            debug = open("debug.txt", 'a+')
+            debug.write(str(errors))
+            debug.close()
+
+            if errors:
+                raise BookingException(errors)
+            else:
+                date_format = "%Y-%m-%d"
+                start_date = datetime.strptime(request.form['start_date'], date_format)
+                end_date = datetime.strptime(request.form['end_date'], date_format)
+                diff = end_date - start_date
+                if 'check' in request.form:
+                    fee = car.get_fee(diff.days)
+                    return render_template(
+                        'booking_form.html',
+                        confirmation=True,
+                        form=request.form,
+                        car=car,
+                        fee=fee,
+                        errors={}
+                    )
+                elif 'confirm' in request.form:
+                    location = Location(request.form['start'], request.form['end'])
+                    booking = system.make_booking(current_user, diff, car, location)
+                    return render_template('booking_confirm.html', booking=booking, errors={})
+        except BookingException as be:
             return render_template(
-                'booking_form.html',
-                confirmation=True,
-                form=request.form,
-                car=car,
-                fee=fee
+                    'booking_form.html',
+                    form=request.form,
+                    car=car,
+                    errors=be.errors
             )
-        elif 'confirm' in request.form:
-            location = Location(request.form['start'], request.form['end'])
-            booking = system.make_booking(current_user, diff, car, location)
-            return render_template('booking_confirm.html', booking=booking)
-    return render_template('booking_form.html', car=car)
+    return render_template('booking_form.html', car=car, errors={})
 
 
 @app.route('/cars/<rego>/bookings')
@@ -107,3 +132,38 @@ def car_bookings(rego):
     #  pass
     car = system.get_car(rego)
     return render_template('bookings.html', bookings=car.get_bookings())
+
+def check_input_fields_booking(start_location, end_location, start_date, end_date):
+    debug = open("debug.txt", 'a+')
+    debug.write("IN CECKER")
+    debug.close()
+
+    errors = {}
+    if start_location == "":
+        errors['start_location'] = "Specify a valid start location"
+        
+    if end_location == "":
+        errors['end_location'] = "Specify a valid end location"
+        
+    date_format = "%Y-%m-%d"
+    try:        
+        start_date = datetime.strptime(start_date, date_format)
+    except:
+        errors['start_date'] = 'Specify a valid start date'
+    try:
+        end_date = datetime.strptime(end_date, date_format)
+    except:
+        errors['end_date'] = 'Specify a valid end date'
+    
+    if 'start_date' not in errors and 'end_date' not in errors:
+        if start_date > end_date:
+            errors['period'] = 'Specify a valid booking period'
+    return errors
+
+class BookingException(Exception):
+    
+    def __init__(self, errors, msg=None):
+        if msg is None:
+            msg = "An error occured with your booking."
+        super(BookingException, self).__init__(msg)
+        self.errors = errors
