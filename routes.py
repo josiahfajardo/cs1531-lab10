@@ -80,17 +80,10 @@ def book(rego):
     if request.method == 'POST':
 
         try:
-            debug = open("debug.txt", 'a+')
-            debug.write(str(request.form))
-            debug.close()
             errors = check_input_fields_booking(request.form['start_location'], 
                                                 request.form['end_location'],
                                                 request.form['start_date'],
                                                 request.form['end_date'])
-            debug = open("debug.txt", 'a+')
-            debug.write(str(errors))
-            debug.close()
-
             if errors:
                 raise BookingException(errors)
             else:
@@ -109,8 +102,12 @@ def book(rego):
                         errors={}
                     )
                 elif 'confirm' in request.form:
-                    location = Location(request.form['start'], request.form['end'])
-                    booking = system.make_booking(current_user, diff, car, location)
+                    #debug = open("debug.txt", 'a+')
+                    #debug.write("IN BOOKING")
+                    #debug.close()
+                    location = Location(request.form['start_location'], request.form['end_location'])
+                    booking = system.make_booking(current_user, diff.days, car, location)
+
                     return render_template('booking_confirm.html', booking=booking, errors={})
         except BookingException as be:
             return render_template(
@@ -134,9 +131,6 @@ def car_bookings(rego):
     return render_template('bookings.html', bookings=car.get_bookings())
 
 def check_input_fields_booking(start_location, end_location, start_date, end_date):
-    debug = open("debug.txt", 'a+')
-    debug.write("IN CECKER")
-    debug.close()
 
     errors = {}
     if start_location == "":

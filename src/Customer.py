@@ -1,7 +1,7 @@
 try:
     from flask_login import UserMixin
 except ImportError:
-    from extra_for_windows.flask_login import UserMixin
+    from ..extra_for_windows.flask_login import UserMixin
 
 from abc import ABCMeta, abstractmethod
 

@@ -1,4 +1,4 @@
-from src.Booking import Booking
+from .Booking import Booking
 
 class CarRentalSystem:
     def __init__(self):
